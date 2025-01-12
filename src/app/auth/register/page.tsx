@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
 type RegisterData = {
@@ -10,7 +11,10 @@ type RegisterData = {
 };
 
 const Register = () => {
+
     const { register, handleSubmit, formState: { errors } } = useForm<RegisterData>();
+    const router = useRouter()
+
     const [success, setSuccess] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
 
@@ -29,9 +33,13 @@ const Register = () => {
             }
 
             setSuccess(true);
+
+            setTimeout(() => {
+                router.push("/login")
+            }, 2000)
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
-            console.log(err)
-            setError(err.message || 'Ocurrió un error al registrar el usuario');
+            setError('Ocurrió un error al registrar el usuario');
         }
     };
 
