@@ -1,20 +1,13 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
-export async function POST(req: Request) {
-    const { name, email, password } = await req.json();
-
+export async function GET() {
     try {
-        const newUser = await prisma.user.create({
-            data: {
-                name,
-                email,
-                password, // Considera hashear la contraseña con bcrypt.
-            },
-        });
-
-        return NextResponse.json(newUser);
+        const users = await prisma.user.findMany();
+        return NextResponse.json(users, { status: 200 });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-        return NextResponse.json({ error: 'Email ya registrado.' }, { status: 400 });
+        // console.error("Error al obtener usuarios:", error);
+        return NextResponse.json({ error: "Error al obtener usuarios" }, { status: 500 });
     }
 }
