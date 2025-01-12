@@ -1,9 +1,9 @@
-// pages/auth/login.tsx
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
+import { signIn } from "next-auth/react";
 
 type LoginData = {
     email: string;
@@ -11,9 +11,7 @@ type LoginData = {
 };
 
 const Login = () => {
-
-    const router = useRouter()
-
+    const router = useRouter();
 
     const { register, handleSubmit, formState: { errors } } = useForm<LoginData>();
     const [error, setError] = useState<string>('');
@@ -21,29 +19,28 @@ const Login = () => {
 
     const onSubmit = async (data: LoginData) => {
         try {
-            const response = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
+            const response = await signIn("credentials", {
+                redirect: false,
+                email: data.email,
+                password: data.password,
             });
 
-            if (!response.ok) {
-                throw new Error('Hubo un problema al iniciar sesión');
+            if (response?.error) {
+                throw new Error(response.error);
             }
 
             setSuccess(true);
 
-            router.push('/')
+            router.push('/');
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
-            setError(err.message || 'Ocurrió un error al iniciar sesión');
+            setError('Ocurrió un error al iniciar sesión');
         }
     };
 
     return (
-        <div className="max-w-sm mx-auto p-4">
-            <h2 className="text-2xl mb-4">Iniciar sesión</h2>
+        <div className="max-w-md mx-auto p-6 border border-gray-300 rounded-lg shadow-lg bg-white">
+            <h2 className="text-2xl mb-4 text-center">Iniciar sesión</h2>
 
             {error && <p className="text-red-500">{error}</p>}
             {success && <p className="text-green-500">¡Inicio de sesión exitoso!</p>}
@@ -69,8 +66,13 @@ const Login = () => {
                     Iniciar sesión
                 </button>
             </form>
+
+            <button onClick={() => signIn("google", { callbackUrl: "/" })} className="w-full mt-4 bg-red-500 text-white py-2 rounded-md">
+                Iniciar sesión con Google
+            </button>
         </div>
     );
 };
 
 export default Login;
+
