@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  password  String
+  role      Role      @default(CLIENT) // Puede ser CLIENT o ADMIN
+  bookings  Booking[] // Relación con las reservas de turnos
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Service {
+  id        String    @id @default(cuid())
+  name      String // Nombre del servicio (ej: Corte de cabello)
+  duration  Int // Duración en minutos
+  price     Float // Precio del servicio
+  bookings  Booking[] // Relación con las reservas de turnos
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Booking {
+  id        String        @id @default(cuid())
+  userId    String // Relación con el cliente
+  user      User          @relation(fields: [userId], references: [id])
+  serviceId String // Relación con el servicio
+  service   Service       @relation(fields: [serviceId], references: [id])
+  dateTime  DateTime // Fecha y hora del turno
+  status    BookingStatus @default(PENDING) // Estado del turno
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
